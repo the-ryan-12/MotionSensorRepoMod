@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace MotionSensorItem;
 
-[BepInPlugin("Vee.MotionSensorItem", "MotionSensorItem", "1.0")]
+[BepInPlugin("Vee.MotionSensorItem", "MotionSensorItem", "0.0.1")]
 [BepInDependency(REPOLib.MyPluginInfo.PLUGIN_GUID, BepInDependency.DependencyFlags.HardDependency)]
 public class MotionSensorItem : BaseUnityPlugin
 {
