@@ -2,7 +2,7 @@
 
 namespace MotionSensorItem
 {
-    [CreateAssetMenu(fileName = "NewItem", menuName = "Other/Item")]
+    [CreateAssetMenu(fileName = "NewItem2", menuName = "Other/Item2")]
     public class ItemOverride : Item
     {
         public bool disabled;
