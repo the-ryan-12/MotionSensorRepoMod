@@ -71,8 +71,6 @@ public class ItemSensor : MonoBehaviour
 
     public bool triggeredByForces = true;
 
-    public bool beepAfterTime;
-
     internal bool wasTriggeredByEnemy;
 
     internal bool wasTriggeredByPlayer;
@@ -82,8 +80,6 @@ public class ItemSensor : MonoBehaviour
     internal bool wasTriggeredByRigidBody;
 
     internal bool firstLight = true;
-
-    private float secondArmedTimer;
 
     private bool wasGrabbed;
 
@@ -96,8 +92,6 @@ public class ItemSensor : MonoBehaviour
     internal States state;
 
     private bool stateStart = true;
-
-    private float stateTimer;
 
     private PhysGrabObjectImpactDetector impactDetector;
 
@@ -121,23 +115,10 @@ public class ItemSensor : MonoBehaviour
 
     private void StateArmed()
     {
-        if (stateStart)
+        if (SemiFunc.IsMasterClientOrSingleplayer() && triggeredByForces && physGrabObject.rb.velocity.magnitude > 0.5f)
         {
-            MotionSensorItem.MotionSensorItem.Logger.LogMessage("ARM NOISE");
-            soundArmedBeep.Play(base.transform.position);
-            ColorSet(emissionColor);
-            lightArmed.intensity = initialLightIntensity * 8f;
-            stateStart = false;
-            secondArmedTimer = 2f;
-        }
-        lightArmed.intensity = Mathf.Lerp(lightArmed.intensity, initialLightIntensity, Time.deltaTime * 4f);
-        if (secondArmedTimer > 0f)
-        {
-            secondArmedTimer -= Time.deltaTime;
-        }
-        if (SemiFunc.IsMasterClientOrSingleplayer() && secondArmedTimer <= 0f && triggeredByForces && physGrabObject.rb.velocity.magnitude > 0.5f)
-        {
-            StateSet(States.Triggering);
+            MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.time}] ARMED -> TRIGGERED");
+            StateSet(States.Triggered);
         }
     }
 
@@ -148,43 +129,53 @@ public class ItemSensor : MonoBehaviour
         meshRenderer.material.SetColor("_EmissionColor", _color);
     }
 
-    private void StateTriggering()
+    //private void StateTriggering()
+    //{
+    //    MotionSensorItem.MotionSensorItem.Logger.LogMessage("triggering called");
+    //    if (stateStart)
+    //    {
+    //        stateStart = false;
+    //        beepTimer = 1f;
+    //    }
+    //    beepTimer -= Time.deltaTime * 4f;
+    //    if (beepTimer < 0f)
+    //    {
+    //        ColorSet(emissionColor);
+    //        beepTimer = 1f;
+    //    }
+    //    stateTimer += Time.deltaTime;
+    //    if (stateTimer > triggeringTime)
+    //    {
+    //        StateSet(States.Triggered);
+    //    }
+    //}
+
+    private void StateTriggered()
     {
-        MotionSensorItem.MotionSensorItem.Logger.LogMessage("triggering called");
+        MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.time}] TRIGGER NOISE");
         if (stateStart)
         {
             stateStart = false;
             beepTimer = 1f;
+            soundTriggereringBeep.Play(base.transform.position);
+            ColorSet(emissionColor);
+            lightArmed.intensity = initialLightIntensity * 8f;
+            lightArmed.intensity = Mathf.Lerp(lightArmed.intensity, initialLightIntensity, Time.deltaTime * 4f);
         }
         beepTimer -= Time.deltaTime * 4f;
         if (beepTimer < 0f)
         {
+            soundTriggereringBeep.Play(base.transform.position);
             ColorSet(emissionColor);
+            lightArmed.intensity = initialLightIntensity * 8f;
             beepTimer = 1f;
+            lightArmed.intensity = Mathf.Lerp(lightArmed.intensity, initialLightIntensity, Time.deltaTime * 4f);
         }
-        stateTimer += Time.deltaTime;
-        if (stateTimer > triggeringTime)
-        {
-            StateSet(States.Triggered);
-        }
-    }
 
-    private void StateTriggered()
-    {
-        MotionSensorItem.MotionSensorItem.Logger.LogMessage("triggered called");
-        if (stateStart)
+        if (SemiFunc.IsMasterClientOrSingleplayer())
         {
-            stateStart = false;
-            beepTimer = 1f;
-            if (!beepAfterTime)
-            {
-                MotionSensorItem.MotionSensorItem.Logger.LogMessage("TRIGGER NOISE");
-                soundTriggereringBeep.Play(base.transform.position);
-            }
-            Color color = new Color(0.5f, 0.9f, 1f);
-            ColorSet(color);
+            StateSet(States.Armed);
         }
-        stateTimer += Time.deltaTime;
     }
 
     private void ResetMine()
@@ -193,7 +184,6 @@ public class ItemSensor : MonoBehaviour
         StateSet(States.Armed);
         if (SemiFunc.IsMasterClientOrSingleplayer())
         {
-            stateTimer = 0f;
             Rigidbody component = GetComponent<Rigidbody>();
             if (!component.isKinematic)
             {
@@ -248,9 +238,6 @@ public class ItemSensor : MonoBehaviour
             case States.Armed:
                 StateArmed();
                 break;
-            case States.Triggering:
-                StateTriggering();
-                break;
             case States.Triggered:
                 StateTriggered();
                 break;
@@ -301,7 +288,6 @@ public class ItemSensor : MonoBehaviour
     {
         state = (States)newState;
         stateStart = true;
-        stateTimer = 0f;
         beepTimer = 0f;
     }
 
@@ -364,7 +350,14 @@ public class ItemSensor : MonoBehaviour
     {
         if (state == States.Armed)
         {
-            StateSet(States.Triggering);
+            StateSet(States.Triggered);
+        }
+    }
+    public void SetUntriggered()
+    {
+        if (state == States.Triggered)
+        {
+            StateSet(States.Armed);
         }
     }
 }

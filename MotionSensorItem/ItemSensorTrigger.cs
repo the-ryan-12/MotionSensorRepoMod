@@ -35,7 +35,7 @@ public class ItemSensorTrigger : MonoBehaviour
     {
         if ((bool)itemSensor && itemSensor.state == ItemSensor.States.Armed && PassesTriggerChecks(other))
         {
-            MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.deltaTime}] motion sensor trigger enter called");
+            MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.time}] motion sensor trigger enter called");
             OnDetect(other);
         }
     }
@@ -50,10 +50,19 @@ public class ItemSensorTrigger : MonoBehaviour
             visionCheckTimer += Time.deltaTime;
             if (visionCheckTimer > 2f)
             {
-                MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.deltaTime}] trigger stay called");
+                MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.time}] trigger stay called");
                 visionCheckTimer = 0f;
                 OnDetect(other);
             }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if ((bool)itemSensor && itemSensor.state == ItemSensor.States.Triggered)
+        {
+            MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.time}] trigger leave called");
+            itemSensor.SetUntriggered();
         }
     }
 
