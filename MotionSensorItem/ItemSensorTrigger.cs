@@ -33,11 +33,13 @@ public class ItemSensorTrigger : MonoBehaviour
         if (!targetAcquired && (bool)itemSensor && itemSensor.state == ItemSensor.States.Armed && PassesTriggerChecks(other))
         {
             OnDetect(other);
+            MotionSensorItem.MotionSensorItem.Logger.LogMessage("motion sensor trigger enter called");
         }
     }
 
     private void OnTriggerStay(Collider other)
     {
+        MotionSensorItem.MotionSensorItem.Logger.LogMessage("trigger stay called");
         if (!targetAcquired && (bool)itemSensor && itemSensor.state == ItemSensor.States.Armed && PassesTriggerChecks(other))
         {
             visionCheckTimer += Time.deltaTime;

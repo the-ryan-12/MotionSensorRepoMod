@@ -27,10 +27,6 @@ public class ItemSensor : MonoBehaviour
 
     public Transform triggerTransform;
 
-    public LineRenderer triggerLine;
-
-    public ParticleSystem lineParticles;
-
     private float beepTimer;
 
     private ItemSensorTrigger itemSensorTrigger;
@@ -57,8 +53,6 @@ public class ItemSensor : MonoBehaviour
 
     private float initialLightIntensity;
 
-    private ParticleScriptExplosion particleScriptExplosion;
-
     private bool hasBeenGrabbed;
 
     private Vector3 startPosition;
@@ -68,10 +62,6 @@ public class ItemSensor : MonoBehaviour
     internal Vector3 triggeredPosition;
 
     internal Transform triggeredTransform;
-
-    internal PlayerAvatar triggeredPlayerAvatar;
-
-    internal PlayerTumble triggeredPlayerTumble;
 
     internal PhysGrabObject triggeredPhysGrabObject;
 
@@ -126,7 +116,6 @@ public class ItemSensor : MonoBehaviour
         initialLightIntensity = lightArmed.intensity;
         impactDetector = GetComponent<PhysGrabObjectImpactDetector>();
         itemSensorTrigger = GetComponentInChildren<ItemSensorTrigger>();
-        particleScriptExplosion = GetComponent<ParticleScriptExplosion>();
         startPosition = base.transform.position;
         itemEquippable = GetComponent<ItemEquippable>();
         startRotation = base.transform.rotation;
