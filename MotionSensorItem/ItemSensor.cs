@@ -8,7 +8,6 @@ public class ItemSensor : MonoBehaviour
     public enum States
     {
         Armed = 0,
-        Triggering = 1,
         Triggered = 2
     }
 
@@ -75,10 +74,6 @@ public class ItemSensor : MonoBehaviour
 
     internal bool wasTriggeredByPlayer;
 
-    internal bool wasTriggeredByForce;
-
-    internal bool wasTriggeredByRigidBody;
-
     internal bool firstLight = true;
 
     private bool wasGrabbed;
@@ -113,42 +108,12 @@ public class ItemSensor : MonoBehaviour
         startRotation = base.transform.rotation;
     }
 
-    private void StateArmed()
-    {
-        if (SemiFunc.IsMasterClientOrSingleplayer() && triggeredByForces && physGrabObject.rb.velocity.magnitude > 0.5f)
-        {
-            MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.time}] ARMED -> TRIGGERED");
-            StateSet(States.Triggered);
-        }
-    }
-
     private void ColorSet(Color _color)
     {
         lightArmed.intensity = initialLightIntensity;
         lightArmed.color = _color;
         meshRenderer.material.SetColor("_EmissionColor", _color);
     }
-
-    //private void StateTriggering()
-    //{
-    //    MotionSensorItem.MotionSensorItem.Logger.LogMessage("triggering called");
-    //    if (stateStart)
-    //    {
-    //        stateStart = false;
-    //        beepTimer = 1f;
-    //    }
-    //    beepTimer -= Time.deltaTime * 4f;
-    //    if (beepTimer < 0f)
-    //    {
-    //        ColorSet(emissionColor);
-    //        beepTimer = 1f;
-    //    }
-    //    stateTimer += Time.deltaTime;
-    //    if (stateTimer > triggeringTime)
-    //    {
-    //        StateSet(States.Triggered);
-    //    }
-    //}
 
     private void StateTriggered()
     {
@@ -167,9 +132,9 @@ public class ItemSensor : MonoBehaviour
         {
             soundTriggereringBeep.Play(base.transform.position);
             ColorSet(emissionColor);
-            lightArmed.intensity = initialLightIntensity * 8f;
+            //lightArmed.intensity = initialLightIntensity * 8f;
+            //lightArmed.intensity = Mathf.Lerp(lightArmed.intensity, initialLightIntensity, Time.deltaTime * 4f);
             beepTimer = 1f;
-            lightArmed.intensity = Mathf.Lerp(lightArmed.intensity, initialLightIntensity, Time.deltaTime * 4f);
         }
 
         if (SemiFunc.IsMasterClientOrSingleplayer())
@@ -225,6 +190,8 @@ public class ItemSensor : MonoBehaviour
         {
             if (SemiFunc.IsMasterClientOrSingleplayer() && wasGrabbed && !physGrabObject.grabbed)
             {
+                MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.time}] Grabbed, maybe throw?");
+
                 Rigidbody component = GetComponent<Rigidbody>();
                 if (!component.isKinematic)
                 {
@@ -235,9 +202,6 @@ public class ItemSensor : MonoBehaviour
         }
         switch (state)
         {
-            case States.Armed:
-                StateArmed();
-                break;
             case States.Triggered:
                 StateTriggered();
                 break;
@@ -355,9 +319,6 @@ public class ItemSensor : MonoBehaviour
     }
     public void SetUntriggered()
     {
-        if (state == States.Triggered)
-        {
-            StateSet(States.Armed);
-        }
+        ResetMine();
     }
 }

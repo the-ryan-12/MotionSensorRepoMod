@@ -35,6 +35,7 @@ public class ItemSensorTrigger : MonoBehaviour
     {
         if ((bool)itemSensor && itemSensor.state == ItemSensor.States.Armed && PassesTriggerChecks(other))
         {
+            visionCheckTimer = 0f;
             MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.time}] motion sensor trigger enter called");
             OnDetect(other);
         }
