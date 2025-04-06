@@ -35,8 +35,6 @@ public class ItemSensor : MonoBehaviour
 
     private ItemAttributes itemAttributes;
 
-    private ItemToggle itemToggle;
-
     [Space(20f)]
     private PhotonView photonView;
 
@@ -119,7 +117,6 @@ public class ItemSensor : MonoBehaviour
         startPosition = base.transform.position;
         itemEquippable = GetComponent<ItemEquippable>();
         startRotation = base.transform.rotation;
-        itemToggle = GetComponent<ItemToggle>();
     }
 
     private void StateArmed()
@@ -140,10 +137,6 @@ public class ItemSensor : MonoBehaviour
         if (SemiFunc.IsMasterClientOrSingleplayer() && secondArmedTimer <= 0f && triggeredByForces && physGrabObject.rb.velocity.magnitude > 0.5f)
         {
             StateSet(States.Triggering);
-        }
-        if (SemiFunc.IsMasterClientOrSingleplayer() && !itemToggle.toggleState)
-        {
-            StateSet(States.Armed);
         }
     }
 
@@ -172,7 +165,7 @@ public class ItemSensor : MonoBehaviour
         {
             StateSet(States.Triggered);
         }
-        if (SemiFunc.IsMasterClientOrSingleplayer() && !itemToggle.toggleState)
+        if (SemiFunc.IsMasterClientOrSingleplayer())
         {
             StateSet(States.Armed);
         }
@@ -216,7 +209,6 @@ public class ItemSensor : MonoBehaviour
     {
         hasBeenGrabbed = false;
         StateSet(States.Armed);
-        itemToggle.ToggleItem(toggle: false);
         if (SemiFunc.IsMasterClientOrSingleplayer())
         {
             stateTimer = 0f;
@@ -243,7 +235,6 @@ public class ItemSensor : MonoBehaviour
     private void Update()
     {
         TriggerRotation();
-        //TriggerLineVisuals();
         TriggerScaleFixer();
         AnimateLight();
         if (physGrabObject.grabbedLocal && !SemiFunc.RunIsShop())
@@ -290,6 +281,9 @@ public class ItemSensor : MonoBehaviour
         onTriggered.Invoke();
     }
 
+    /// <summary>
+    /// Sets the state, skipping if it is multiplayer/not the master client, or if its the same state.
+    /// </summary>
     private void StateSet(States newState)
     {
         if (!SemiFunc.IsMasterClientOrSingleplayer() || newState == state)
@@ -317,6 +311,9 @@ public class ItemSensor : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets the state for all other instances of the game in MP
+    /// </summary>
     [PunRPC]
     public void StateSetRPC(int newState)
     {
@@ -378,29 +375,9 @@ public class ItemSensor : MonoBehaviour
         triggerTransform.localRotation = SemiFunc.SpringQuaternionGet(triggerSpringQuaternion, triggerTargetRotation);
     }
 
-    //private void TriggerLineVisuals()
-    //{
-    //    if (state == States.Armed)
-    //    {
-    //        triggerLine.material.SetTextureOffset("_MainTex", new Vector2((0f - Time.time) * 2f, 0f));
-    //        if (!triggerLine.enabled)
-    //        {
-    //            triggerLine.enabled = true;
-    //            lineParticles.Play();
-    //        }
-    //        triggerLine.widthMultiplier = Mathf.Lerp(triggerLine.widthMultiplier, 1f, Time.deltaTime * 4f);
-    //    }
-    //    else if (triggerLine.enabled)
-    //    {
-    //        triggerLine.widthMultiplier = Mathf.Lerp(triggerLine.widthMultiplier, 0f, Time.deltaTime * 8f);
-    //        if (triggerLine.widthMultiplier < 0.01f)
-    //        {
-    //            triggerLine.enabled = false;
-    //            lineParticles.Stop();
-    //        }
-    //    }
-    //}
-
+    /// <summary>
+    /// Sets the state, if armed, to triggered
+    /// </summary>
     public void SetTriggered()
     {
         if (state == States.Armed)

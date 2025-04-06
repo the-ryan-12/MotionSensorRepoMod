@@ -27,24 +27,30 @@ public class ItemSensorTrigger : MonoBehaviour
             Object.Destroy(this);
         }
     }
-
+    
+    /// <summary>
+    /// Once the trigger hitbox is entered, calls OnDetect function when it meets these conditions: ItemSensor exists, the state is armed, passes trigger checks
+    /// </summary>
     private void OnTriggerEnter(Collider other)
     {
-        if (!targetAcquired && (bool)itemSensor && itemSensor.state == ItemSensor.States.Armed && PassesTriggerChecks(other))
+        if ((bool)itemSensor && itemSensor.state == ItemSensor.States.Armed && PassesTriggerChecks(other))
         {
+            MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.deltaTime}] motion sensor trigger enter called");
             OnDetect(other);
-            MotionSensorItem.MotionSensorItem.Logger.LogMessage("motion sensor trigger enter called");
         }
     }
 
+    /// <summary>
+    /// while the trigger hitbox has something in it, calls OnDetect function when it meets these conditions: ItemSensor exists, the state is armed, passes trigger checks, and the timer is above 2f
+    /// </summary>
     private void OnTriggerStay(Collider other)
     {
-        MotionSensorItem.MotionSensorItem.Logger.LogMessage("trigger stay called");
-        if (!targetAcquired && (bool)itemSensor && itemSensor.state == ItemSensor.States.Armed && PassesTriggerChecks(other))
+        if ((bool)itemSensor && itemSensor.state == ItemSensor.States.Armed && PassesTriggerChecks(other))
         {
             visionCheckTimer += Time.deltaTime;
             if (visionCheckTimer > 2f)
             {
+                MotionSensorItem.MotionSensorItem.Logger.LogMessage($"[{Time.deltaTime}] trigger stay called");
                 visionCheckTimer = 0f;
                 OnDetect(other);
             }
