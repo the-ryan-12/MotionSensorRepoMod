@@ -123,6 +123,7 @@ public class ItemSensor : MonoBehaviour
     {
         if (stateStart)
         {
+            MotionSensorItem.MotionSensorItem.Logger.LogMessage("ARM NOISE");
             soundArmedBeep.Play(base.transform.position);
             ColorSet(emissionColor);
             lightArmed.intensity = initialLightIntensity * 8f;
@@ -149,6 +150,7 @@ public class ItemSensor : MonoBehaviour
 
     private void StateTriggering()
     {
+        MotionSensorItem.MotionSensorItem.Logger.LogMessage("triggering called");
         if (stateStart)
         {
             stateStart = false;
@@ -165,20 +167,18 @@ public class ItemSensor : MonoBehaviour
         {
             StateSet(States.Triggered);
         }
-        if (SemiFunc.IsMasterClientOrSingleplayer())
-        {
-            StateSet(States.Armed);
-        }
     }
 
     private void StateTriggered()
     {
+        MotionSensorItem.MotionSensorItem.Logger.LogMessage("triggered called");
         if (stateStart)
         {
             stateStart = false;
             beepTimer = 1f;
             if (!beepAfterTime)
             {
+                MotionSensorItem.MotionSensorItem.Logger.LogMessage("TRIGGER NOISE");
                 soundTriggereringBeep.Play(base.transform.position);
             }
             Color color = new Color(0.5f, 0.9f, 1f);
@@ -186,24 +186,6 @@ public class ItemSensor : MonoBehaviour
         }
         stateTimer += Time.deltaTime;
     }
-
-    //public void DestroyMine()
-    //{
-    //    if (!SemiFunc.RunIsShop())
-    //    {
-    //        if (!mineDestroyed)
-    //        {
-    //            StatsManager.instance.ItemRemove(itemAttributes.instanceName);
-    //            impactDetector.DestroyObject();
-    //            mineDestroyed = true;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        ResetMine();
-    //        physGrabObject.Teleport(startPosition, startRotation);
-    //    }
-    //}
 
     private void ResetMine()
     {
